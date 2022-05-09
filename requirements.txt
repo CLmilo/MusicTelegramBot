@@ -1,0 +1,3 @@
+telegram
+telethon
+requests
