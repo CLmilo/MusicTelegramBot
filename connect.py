@@ -23,16 +23,20 @@ def Buscar_Message_id_or(param):
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
     #param = 'anime', 'opening'
+    print("hola2")
     cursor.execute("SELECT distinct on (message_id) * FROM public.songs where lower(TRIM(tag)) in ("+param+")")
+    print("hola3")
     return cursor
 
-def Buscar_Message_id_and(param):
+def Buscar_Message_id_and(param,cant):
     conn = None
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
     #param = 'anime', 'opening'
-    cursor.execute("SELECT DISTINCT ON (message_id) * FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda1 WHERE(message_id) IN(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>1)")
+    print("hola4")
+    cursor.execute("SELECT DISTINCT ON (message_id) * FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda1 WHERE(message_id) IN(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+")")
+    print("hola5")
     return cursor
 
 #if __name__ == '__main__':

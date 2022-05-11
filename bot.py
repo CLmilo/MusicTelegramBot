@@ -16,26 +16,15 @@ with open('.token') as file:
 lista=[]
 maximotag=20
 
-def extractRelation(p_offset,number_message):
-    url = "https://api.telegram.org/bot"+TOKEN+"/getUpdates"
-
-    offsetParam = {
-        'offset' : p_offset,
-        'limit' : 100
-    }
-    resp = requests.get(url,params=offsetParam)
-    caption = json.loads(resp.text)
-    result = caption['result'][0]['channel_post']['caption']
-    tags = result.split('#')
-
 def copyMessage(number_message,chat_id):
     url = "https://api.telegram.org/bot"+TOKEN+"/copyMessage"
     parameters = {
         "chat_id" : chat_id,
         "from_chat_id" : "-1001735492901",
-        "message_id" : number_message    
+        "message_id" : number_message
     }
     resp = requests.get(url, data = parameters)
+
 def sendMessage(chat_id, text):
     url = "https://api.telegram.org/bot"+TOKEN+"/sendMessage"
     parameters = {
@@ -48,7 +37,7 @@ def start(update, context):
     global lista
     lista = []
     id_chat = update.effective_user['id']
-    sendMessage(id_chat, "Ingrese los tags a buscar en formato (/tag param1 param2 ...): ")
+    sendMessage(id_chat, "Ingrese los tags a buscar en formato (/tag param1 param2 ...): \nOpciones de búsqueda:\n/maxtag : Número máximo de mensajes de respuesta (default=20).\n/search : Búsqueda de canciones que tengan todos los tags puestos.\n/searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.")
 
 def tags(update, context):
     caption_mensaje_actual = update.message['text'].split(" ")
@@ -64,20 +53,26 @@ def searchall(update, context):
     param = re.sub("\[|\]","",str(lista))
     lista=[]
     cursor = Buscar_Message_id_or(param).fetchmany(maximotag)
+    if (cursor==""):
+        sendMessage(chat_id,"No hay resultados")
     maximotag=20
     for message_id in cursor:
-        copyMessage(message_id[1],chat_id)
+        copyMessage(message_id[0],chat_id)
 
 def search(update, context):
     global lista
     global maximotag
     chat_id = update.effective_user['id']
     param = re.sub("\[|\]","",str(lista))
+    cant=len(lista)-1
+    cant=str(cant)
     lista=[]
-    cursor = Buscar_Message_id_and(param).fetchmany(maximotag)
+    cursor = Buscar_Message_id_and(param,cant).fetchmany(maximotag)
     maximotag=20
+    if (cursor==""):
+        sendMessage(chat_id,"No hay resultados")
     for message_id in cursor:
-        copyMessage(message_id[1],chat_id)
+        copyMessage(message_id[0],chat_id)
 
 def maxtag(update, context):
     global maximotag
@@ -102,6 +97,4 @@ dp.add_handler(CommandHandler("search", search))
 updater.start_polling()
 
 updater.idle()
-
-    
 

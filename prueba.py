@@ -21,3 +21,4 @@ def Inserccion_masiva_canciones():
             if (tag!=""):
                 INSERT_SONG(message.id,tag)
 
+Inserccion_masiva_canciones()
