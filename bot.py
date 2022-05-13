@@ -68,7 +68,10 @@ def searchall(update):
     for tag in caption_mensaje_actual:
         lista_tag.append(tag.lower())
     post_author = "name=" + str(Get_post_author(chat_id))
-    lista_tag.append(post_author)
+    if post_author == "name=all":
+        pass
+    else:
+        lista_tag.append(post_author)
     lista_tag.remove("/tag")
     param = re.sub("\[|\]","",str(lista_tag))
     lista_tag=[]
@@ -88,7 +91,10 @@ def search(update):
     for tag in caption_mensaje_actual:
         lista_tag.append(tag.lower())
     post_author = "name=" + str(Get_post_author(chat_id))
-    lista_tag.append(post_author)
+    if post_author == "name=all":
+        pass
+    else:
+        lista_tag.append(post_author)
     lista_tag.remove("/tag")
     param = re.sub("\[|\]","",str(lista_tag))
     lista_tag=[]
@@ -122,8 +128,6 @@ updater = Updater(my_bot.token, use_context=True)
 dp = updater.dispatcher
 
 #Creamos los manejadores
-dp.add_handler(CommandHandler("start", start))
-dp.add_handler(CommandHandler("tag", tags))
 dp.add_handler(CommandHandler("searchall", searchall))
 dp.add_handler(CommandHandler("maxsongs", maxsongs))
 dp.add_handler(CommandHandler("search", search))
