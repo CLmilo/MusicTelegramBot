@@ -67,7 +67,7 @@ def searchall(update,context):
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
         lista_tag.append(tag.lower())
-    post_author = "name=" + str(Get_post_author(chat_id))
+    post_author = "name=" + str(Get_post_author(str(chat_id)))
     if post_author == "name=all":
         pass
     else:
@@ -75,7 +75,7 @@ def searchall(update,context):
     lista_tag.remove("/tag")
     param = re.sub("\[|\]","",str(lista_tag))
     lista_tag=[]
-    max_songs = int(Get_max_song(chat_id))
+    max_songs = int(Get_max_song(str(chat_id)))
     cursor = Buscar_Message_id_or(param).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
@@ -90,7 +90,7 @@ def search(update,context):
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
         lista_tag.append(tag.lower())
-    post_author = "name=" + str(Get_post_author(chat_id))
+    post_author = "name=" + str(Get_post_author(str(chat_id)))
     if post_author == "name=all":
         pass
     else:
@@ -100,7 +100,7 @@ def search(update,context):
     lista_tag=[]
     cant=len(lista_tag)-1
     cant=str(cant)
-    max_songs = int(Get_max_song(chat_id))
+    max_songs = int(Get_max_song(str(chat_id)))
     cursor = Buscar_Message_id_and(param,cant).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
@@ -110,13 +110,13 @@ def search(update,context):
         sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
 
 def maxsongs(update,context):
-    id_user = update.effective_user["id"]
-    nuevo_max = int(update.message['text'].split(" ")[1])
+    id_user = str(update.effective_user["id"])
+    nuevo_max = str((update.message['text'].split(" ")[1]))
     Modify_max_song(id_user, nuevo_max)
 
 def post_author(update,context):
-    id_user = update.effective_user["id"]
-    post_author = int(update.message['text'].split(" ")[1])
+    id_user = str(update.effective_user["id"])
+    post_author = str(int(update.message['text'].split(" ")[1]))
     Modify_post_author(id_user,post_author)
 
 if __name__ == "__main__":

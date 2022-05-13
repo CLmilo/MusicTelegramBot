@@ -85,7 +85,7 @@ def Modify_max_song(p_id_user, p_max_song):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    cursor.execute("update public.users set max_song = "+str(p_max_song)+" where id_user ='"+p_id_user+"'")
+    cursor.execute("update public.users set max_song = "+p_max_song+" where id_user ='"+p_id_user+"'")
     conn.commit()
 
 def Get_max_song(p_id_user):
@@ -93,9 +93,7 @@ def Get_max_song(p_id_user):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    sql="Select max_song from public.users where id_user = (%s)"
-    datos = (p_id_user)
-    cursor.execute(sql, datos)
+    cursor.execute("Select max_song from public.users where id_user ='"+p_id_user+"'")
     conn.commit()
     return cursor
 
