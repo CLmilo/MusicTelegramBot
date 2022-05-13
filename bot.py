@@ -1,6 +1,7 @@
 from imp import cache_from_source
 import json
 from sqlite3 import paramstyle
+from turtle import pos
 from unicodedata import name
 from winsound import PlaySound
 import requests
@@ -37,8 +38,23 @@ def sendMessage(chat_id, text):
 
 def help(update, context):
     id_chat = update.effective_user['id']
-    sendMessage(id_chat, "Ingrese los tags a buscar en formato (/tag param1 param2 ...): \nOpciones de búsqueda:\n/maxsongs : Número máximo de mensajes de respuesta (default=20).\n/search : Búsqueda de canciones que tengan todos los tags puestos.\n/searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.")
-    print(update.effective_user['id'])
+    sendMessage(id_chat, """Crea un usuario con /createuser la primera vez
+    Ingrese los tags a buscar en formato (/search param1 param2 ...) or (/searchall): 
+    /search : Búsqueda de canciones que tengan todos los tags puestos.
+    /searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.
+    Opciones de búsqueda:
+    /maxsongs: Número máximo de mensajes de respuesta (default=20). 
+    /post_author: Persona que ha subido la canción (ver su nombre en el canal), si deseas regresar a buscar todos colocar "all".
+    Opciones de lista:
+    /createlist: Cree una lista con el formato (/createlist nombredelista) el nombre de la lista sin espacios.
+    /deletelist: Elimine una lista con el formato (/deletelist nombredelista) el nombre de la lista sin espacios(no hay backup tenga cuidado).
+    /addtolist: Añada canciones a la lista con el formato(/addtolist nombredelista codigo_cancion1 codigo_cancion2 ...) donde el código de canción lo ves buscando canciones con search.
+    /rmfromlist: Remover canciones de una lista con el formato (/rmfromlist nombredelista codigo_cancion1 codigo_cancion2 ...).
+    /listplaylists: Mostar todas tus listas 
+    Reproducción:
+    /play: Reproducir una lista en el orden guardado con el formato (/play nombredelista).
+    /playr: Reproducir una lista en orden aleatorio con el formato (/playr nombredelista).
+    """)
 
 def createuser(update,context):
     id = update.effective_user['id']
@@ -130,7 +146,7 @@ def maxsongs(update,context):
 
 def post_author(update,context):
     id_user = str(update.effective_user["id"])
-    post_author = str(int(update.message['text'].split(" ")[1]))
+    post_author = str(update.message['text'])[13:]
     Modify_post_author(id_user,post_author)
 
 def play(update,context):
@@ -161,17 +177,16 @@ def deleteplaylist(update,context):
 def listplaylists(update,context):
     id_user = str(update.effective_user["id"])
     listas = Get_userlists(id_user)
-    mensaje = "Las listas existentes son: "
-
+    mensaje = ""
+    mensaje= mensaje +"Las listas existentes son: "
     for lista in listas:
         canciones = Get_songs_in_list(str(lista[0]))
-        mensaje = "\n"+ mensaje + str(lista[1]) + " contiene: "
+        mensaje = mensaje + "\n- "+str(lista[1])+ " contiene: "
         for cancion in canciones:
-            mensaje = "\n *"+ cancion[3]+ "("+str(cancion[1])+")"
+           mensaje = mensaje + "\n  *"+ cancion[3]+ " ("+str(cancion[1])+")"
+    sendMessage(id_user,mensaje)
+    mensaje=""
     
-    print(mensaje)
-    mensaje=""    
-
 if __name__ == "__main__":
     my_bot = telegram.Bot(token = TOKEN)
     #print(my_bot.getMe())
@@ -193,6 +208,7 @@ dp.add_handler(CommandHandler("deleteplaylist", deleteplaylist))
 dp.add_handler(CommandHandler("rmfromlist", removefromlist))
 dp.add_handler(CommandHandler("listplaylists", listplaylists))
 dp.add_handler(CommandHandler("post_author", post_author))
+dp.add_handler(CommandHandler("help", help))
 
 
 
