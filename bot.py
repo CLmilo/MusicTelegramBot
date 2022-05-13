@@ -1,10 +1,11 @@
 import json
 from sqlite3 import paramstyle
+from unicodedata import name
 import requests
 import re
 import telegram
 from telegram.ext import Updater, CommandHandler
-from connect import Buscar_Message_id_and, Buscar_Message_id_or
+from connect import Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Get_max_song, Get_post_author, Modify_max_song, Modify_post_author, Obtain_id_list
 
 #p_offset="266734324"
 
@@ -13,8 +14,7 @@ with open('.token') as file:
     TOKEN = list[0].rstrip("\n")
     file.close()
 
-lista=[]
-maximotag=20
+lista_tag=[]
 
 def copyMessage(number_message,chat_id):
     url = "https://api.telegram.org/bot"+TOKEN+"/copyMessage"
@@ -33,52 +33,85 @@ def sendMessage(chat_id, text):
     }
     resp = requests.get(url, data = parameters)
 
-def start(update, context):
-    global lista
-    lista = []
+def help(update, context):
     id_chat = update.effective_user['id']
-    sendMessage(id_chat, "Ingrese los tags a buscar en formato (/tag param1 param2 ...): \nOpciones de búsqueda:\n/maxtag : Número máximo de mensajes de respuesta (default=20).\n/search : Búsqueda de canciones que tengan todos los tags puestos.\n/searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.")
+    sendMessage(id_chat, "Ingrese los tags a buscar en formato (/tag param1 param2 ...): \nOpciones de búsqueda:\n/maxsongs : Número máximo de mensajes de respuesta (default=20).\n/search : Búsqueda de canciones que tengan todos los tags puestos.\n/searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.")
     print(update.effective_user['id'])
 
-def tags(update, context):
+def createuser(update):
+    id = update.effective_user['id']
+    nombre = update.effective_user['first_name']+" "+update.effective_user['last_name']
+    Create_user(id, nombre)
+
+def createlist(update):
+    id = update.effective_user['id']
+    name_list = update.message['text'].split(" ")[1]
+    Create_list(id,name_list)
+
+def addtolist(update):
+    id = update.effective_user['id']
+    mensaje = update.message['text'].split(" ")
+    name_list = mensaje[1]
+    id_lista = Obtain_id_list(id,name_list)
+    lista_mensajes = []
+    for message_id in mensaje:
+        lista_mensajes.append(message_id)
+    lista_mensajes.remove("/addtolist")
+    lista_mensajes.remove(name_list)
+    for message_id in lista_mensajes:
+        Add_to_list(id_lista, message_id)
+    
+def searchall(update):
+    lista_tag=[]
+    chat_id = update.effective_user['id']
     caption_mensaje_actual = update.message['text'].split(" ")
-    global lista
     for tag in caption_mensaje_actual:
-        lista.append(tag.lower())
-    lista.remove("/tag")
-
-def searchall(update, context):
-    global lista
-    global maximotag
-    chat_id = update.effective_user['id']
-    param = re.sub("\[|\]","",str(lista))
-    lista=[]
-    cursor = Buscar_Message_id_or(param).fetchmany(maximotag)
+        lista_tag.append(tag.lower())
+    post_author = "name=" + str(Get_post_author(chat_id))
+    lista_tag.append(post_author)
+    lista_tag.remove("/tag")
+    param = re.sub("\[|\]","",str(lista_tag))
+    lista_tag=[]
+    max_songs = int(Get_max_song(chat_id))
+    cursor = Buscar_Message_id_or(param).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
-    maximotag=20
     for message_id in cursor:
-        copyMessage(message_id[0],chat_id)
+        copyMessage(message_id[1],chat_id)
+        sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
 
-def search(update, context):
-    global lista
+def search(update):
     global maximotag
+    lista_tag=[]
     chat_id = update.effective_user['id']
-    param = re.sub("\[|\]","",str(lista))
-    cant=len(lista)-1
+    caption_mensaje_actual = update.message['text'].split(" ")
+    for tag in caption_mensaje_actual:
+        lista_tag.append(tag.lower())
+    post_author = "name=" + str(Get_post_author(chat_id))
+    lista_tag.append(post_author)
+    lista_tag.remove("/tag")
+    param = re.sub("\[|\]","",str(lista_tag))
+    lista_tag=[]
+    cant=len(lista_tag)-1
     cant=str(cant)
-    lista=[]
-    cursor = Buscar_Message_id_and(param,cant).fetchmany(maximotag)
-    maximotag=20
+    max_songs = int(Get_max_song(chat_id))
+    cursor = Buscar_Message_id_and(param,cant).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
+    maximotag=20
     for message_id in cursor:
-        copyMessage(message_id[0],chat_id)
+        copyMessage(message_id[1],chat_id)
+        sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
 
-def maxtag(update, context):
-    global maximotag
+def maxsongs(update):
+    id_user = update.effective_user["id"]
     nuevo_max = int(update.message['text'].split(" ")[1])
-    maximotag = nuevo_max
+    Modify_max_song(id_user, nuevo_max)
+
+def post_author(update):
+    id_user = update.effective_user["id"]
+    post_author = int(update.message['text'].split(" ")[1])
+    Modify_post_author(id_user,post_author)
 
 if __name__ == "__main__":
     my_bot = telegram.Bot(token = TOKEN)
@@ -92,8 +125,11 @@ dp = updater.dispatcher
 dp.add_handler(CommandHandler("start", start))
 dp.add_handler(CommandHandler("tag", tags))
 dp.add_handler(CommandHandler("searchall", searchall))
-dp.add_handler(CommandHandler("maxtags", maxtag))
+dp.add_handler(CommandHandler("maxsongs", maxsongs))
 dp.add_handler(CommandHandler("search", search))
+dp.add_handler(CommandHandler("createuser", createuser))
+dp.add_handler(CommandHandler("createlist", createlist))
+
 
 updater.start_polling()
 
