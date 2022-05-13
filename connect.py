@@ -95,11 +95,17 @@ def Get_max_song(p_id_user):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
+<<<<<<< HEAD
     sql = "Select * from public.users where id_user = '"+p_id_user+"'"
     cursor.execute(sql)
     for message in cursor:
         print(message[0])
     return message[0]
+=======
+    cursor.execute("Select max_song from public.users where id_user ='"+p_id_user+"'")
+    print(cursor)
+    return cursor
+>>>>>>> a1fbee090a31b3066a1f0ad2c3e3212beb419dd1
 
 def Get_post_author(p_id_user):
     conn = None
