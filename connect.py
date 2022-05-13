@@ -23,9 +23,7 @@ def Buscar_Message_id_or(param):
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
     #param = 'anime', 'opening'
-    print("hola2")
     cursor.execute("SELECT distinct on (message_id) * FROM public.songs where lower(TRIM(tag)) in ("+param+")")
-    print("hola3")
     return cursor
 
 def Buscar_Message_id_and(param,cant):

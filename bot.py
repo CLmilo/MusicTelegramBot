@@ -38,6 +38,7 @@ def start(update, context):
     lista = []
     id_chat = update.effective_user['id']
     sendMessage(id_chat, "Ingrese los tags a buscar en formato (/tag param1 param2 ...): \nOpciones de búsqueda:\n/maxtag : Número máximo de mensajes de respuesta (default=20).\n/search : Búsqueda de canciones que tengan todos los tags puestos.\n/searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.")
+    print(update.effective_user['id'])
 
 def tags(update, context):
     caption_mensaje_actual = update.message['text'].split(" ")
