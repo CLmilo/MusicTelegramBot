@@ -57,7 +57,9 @@ def Obtain_id_list(p_user_id, p_nombre_lista):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    id_lista = cursor.execute("Select id_lista from public.lists where (id_user='"+p_user_id+"' and nombre_lista = '"+p_nombre_lista+"')")
+    cursor.execute("Select * from public.lists where (id_user='"+p_user_id+"' and nombre_lista = '"+p_nombre_lista+"')")
+    for message in cursor:
+        id_lista = message[0]
     return id_lista
 
 def Add_to_list(p_id_lista, message_id):
@@ -65,7 +67,7 @@ def Add_to_list(p_id_lista, message_id):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    sql="insert into public.song_list(id_lista,message_id) values (%s,%s)"
+    sql="insert into public.songs_list(id_lista,message_id) values (%s,%s)"
     datos = (p_id_lista, message_id)
     cursor.execute(sql, datos)
     conn.commit()
@@ -93,9 +95,11 @@ def Get_max_song(p_id_user):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    cursor.execute("Select max_song from public.users where id_user ='"+p_id_user+"'")
-    conn.commit()
-    return cursor
+    sql = "Select * from public.users where id_user = '"+p_id_user+"'"
+    cursor.execute(sql)
+    for message in cursor:
+        print(message[0])
+    return message[0]
 
 def Get_post_author(p_id_user):
     conn = None
@@ -104,6 +108,15 @@ def Get_post_author(p_id_user):
     cursor = conn.cursor()
     cursor.execute("SELECT post_author from public.users where id_user ='"+p_id_user+"'")
     return cursor
+
+def Get_playlist(p_id_list):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("select * from public.songs_list where id_list ='"+p_id_list+"'")
+    return cursor
+
 
 #if __name__ == '__main__':
 #    connect()

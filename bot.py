@@ -49,18 +49,18 @@ def createlist(update,context):
     Create_list(id,name_list)
 
 def addtolist(update,context):
-    id = update.effective_user['id']
+    id = str(update.effective_user['id'])
     mensaje = update.message['text'].split(" ")
-    name_list = mensaje[1]
-    id_lista = Obtain_id_list(id,name_list)
+    name_list = str(mensaje[1])
+    id_lista = str(Obtain_id_list(id,name_list))
     lista_mensajes = []
     for message_id in mensaje:
         lista_mensajes.append(message_id)
     lista_mensajes.remove("/addtolist")
     lista_mensajes.remove(name_list)
-    for message_id in lista_mensajes:
+        for message_id in lista_mensajes:
         Add_to_list(id_lista, message_id)
-    
+
 def searchall(update,context):
     lista_tag=[]
     chat_id = update.effective_user['id']
@@ -84,7 +84,6 @@ def searchall(update,context):
         sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
 
 def search(update,context):
-    global maximotag
     lista_tag=[]
     chat_id = update.effective_user['id']
     caption_mensaje_actual = update.message['text'].split(" ")
@@ -100,12 +99,10 @@ def search(update,context):
     lista_tag=[]
     cant=len(lista_tag)-1
     cant=str(cant)
-    max_songs = Get_max_song(str(chat_id))
-    print(max_songs)
+    max_songs = int(Get_max_song(str(chat_id)))
     cursor = Buscar_Message_id_and(param,cant).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
-    maximotag=20
     for message_id in cursor:
         copyMessage(message_id[1],chat_id)
         sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
@@ -119,6 +116,16 @@ def post_author(update,context):
     id_user = str(update.effective_user["id"])
     post_author = str(int(update.message['text'].split(" ")[1]))
     Modify_post_author(id_user,post_author)
+
+def playlist(update,context):
+    id_user = str(update.effective_user["id"])
+    name_playlist = str(update.message["text"].split(" ")[1])
+    id_list = str(Obtain_id_list(id_user, name_playlist))
+    cursor = Get_playlist(id_list)
+    print(cursor)
+    for message_id in cursor:
+        copyMessage(message_id[1], id_user)
+        print(message_id[1])
 
 if __name__ == "__main__":
     my_bot = telegram.Bot(token = TOKEN)
@@ -134,6 +141,7 @@ dp.add_handler(CommandHandler("maxsongs", maxsongs))
 dp.add_handler(CommandHandler("search", search))
 dp.add_handler(CommandHandler("createuser", createuser))
 dp.add_handler(CommandHandler("createlist", createlist))
+dp.add_handler(CommandHandler("addtolist", addtolist))
 
 
 updater.start_polling()
