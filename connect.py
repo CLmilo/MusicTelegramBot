@@ -94,6 +94,7 @@ def Get_max_song(p_id_user):
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
     cursor.execute("Select max_song from public.users where id_user ='"+p_id_user+"'")
+    print(cursor)
     return cursor
 
 def Get_post_author(p_id_user):
