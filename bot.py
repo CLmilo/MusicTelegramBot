@@ -1,9 +1,5 @@
-from imp import cache_from_source
 import json
 from sqlite3 import paramstyle
-from turtle import pos
-from unicodedata import name
-from winsound import PlaySound
 import requests
 import re
 import telegram
