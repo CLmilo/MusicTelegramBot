@@ -38,17 +38,17 @@ def help(update, context):
     sendMessage(id_chat, "Ingrese los tags a buscar en formato (/tag param1 param2 ...): \nOpciones de búsqueda:\n/maxsongs : Número máximo de mensajes de respuesta (default=20).\n/search : Búsqueda de canciones que tengan todos los tags puestos.\n/searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.")
     print(update.effective_user['id'])
 
-def createuser(update):
+def createuser(update,context):
     id = update.effective_user['id']
     nombre = update.effective_user['first_name']+" "+update.effective_user['last_name']
     Create_user(id, nombre)
 
-def createlist(update):
+def createlist(update,context):
     id = update.effective_user['id']
     name_list = update.message['text'].split(" ")[1]
     Create_list(id,name_list)
 
-def addtolist(update):
+def addtolist(update,context):
     id = update.effective_user['id']
     mensaje = update.message['text'].split(" ")
     name_list = mensaje[1]
@@ -61,7 +61,7 @@ def addtolist(update):
     for message_id in lista_mensajes:
         Add_to_list(id_lista, message_id)
     
-def searchall(update):
+def searchall(update,context):
     lista_tag=[]
     chat_id = update.effective_user['id']
     caption_mensaje_actual = update.message['text'].split(" ")
@@ -83,7 +83,7 @@ def searchall(update):
         copyMessage(message_id[1],chat_id)
         sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
 
-def search(update):
+def search(update,context):
     global maximotag
     lista_tag=[]
     chat_id = update.effective_user['id']
@@ -109,12 +109,12 @@ def search(update):
         copyMessage(message_id[1],chat_id)
         sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
 
-def maxsongs(update):
+def maxsongs(update,context):
     id_user = update.effective_user["id"]
     nuevo_max = int(update.message['text'].split(" ")[1])
     Modify_max_song(id_user, nuevo_max)
 
-def post_author(update):
+def post_author(update,context):
     id_user = update.effective_user["id"]
     post_author = int(update.message['text'].split(" ")[1])
     Modify_post_author(id_user,post_author)

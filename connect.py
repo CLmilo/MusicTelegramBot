@@ -37,7 +37,7 @@ def Create_user(p_user_id,p_nombre_user, maxsong=20, post_author='all'):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    sql="insert into public.users(id_user,nombre_user,max_song, post_author) values (%s,%s.%s,%s)"
+    sql="insert into public.users(id_user,nombre_user, max_song, post_author) values (%s,%s,%s,%s)"
     datos = (p_user_id, p_nombre_user, maxsong, post_author)
     cursor.execute(sql, datos)
     conn.commit()
