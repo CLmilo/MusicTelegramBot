@@ -72,7 +72,7 @@ def searchall(update,context):
         pass
     else:
         lista_tag.append(post_author)
-    lista_tag.remove("/tag")
+    lista_tag.remove("searchall")
     param = re.sub("\[|\]","",str(lista_tag))
     lista_tag=[]
     max_songs = int(Get_max_song(str(chat_id)))
@@ -95,7 +95,7 @@ def search(update,context):
         pass
     else:
         lista_tag.append(post_author)
-    lista_tag.remove("/tag")
+    lista_tag.remove("/search")
     param = re.sub("\[|\]","",str(lista_tag))
     lista_tag=[]
     cant=len(lista_tag)-1
