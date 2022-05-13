@@ -1,11 +1,13 @@
+from imp import cache_from_source
 import json
 from sqlite3 import paramstyle
 from unicodedata import name
+from winsound import PlaySound
 import requests
 import re
 import telegram
 from telegram.ext import Updater, CommandHandler
-from connect import Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Get_max_song, Get_post_author, Modify_max_song, Modify_post_author, Obtain_id_list
+from connect import Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
 
 #p_offset="266734324"
 
@@ -46,7 +48,8 @@ def createuser(update,context):
 def createlist(update,context):
     id = update.effective_user['id']
     name_list = update.message['text'].split(" ")[1]
-    Create_list(id,name_list)
+    cursor = Create_list(id,name_list)
+    print (cursor)
 
 def addtolist(update,context):
     id = str(update.effective_user['id'])
@@ -58,8 +61,21 @@ def addtolist(update,context):
         lista_mensajes.append(message_id)
     lista_mensajes.remove("/addtolist")
     lista_mensajes.remove(name_list)
-        for message_id in lista_mensajes:
+    for message_id in lista_mensajes:
         Add_to_list(id_lista, message_id)
+
+def removefromlist(update,context):
+    id = str(update.effective_user['id'])
+    mensaje = update.message['text'].split(" ")
+    name_list = str(mensaje[1])
+    id_lista = str(Obtain_id_list(id,name_list))
+    lista_mensajes = []
+    for message_id in mensaje:
+        lista_mensajes.append(message_id)
+    lista_mensajes.remove("/rmfromlist")
+    lista_mensajes.remove(name_list)
+    for message_id in lista_mensajes:
+        Delete_song_in_playlist(id_lista, message_id)
 
 def searchall(update,context):
     lista_tag=[]
@@ -117,15 +133,44 @@ def post_author(update,context):
     post_author = str(int(update.message['text'].split(" ")[1]))
     Modify_post_author(id_user,post_author)
 
-def playlist(update,context):
+def play(update,context):
     id_user = str(update.effective_user["id"])
     name_playlist = str(update.message["text"].split(" ")[1])
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Get_playlist(id_list)
-    print(cursor)
     for message_id in cursor:
-        copyMessage(message_id[1], id_user)
-        print(message_id[1])
+        copyMessage(message_id[2], id_user)
+        sendMessage(id_user, "Código de Canción : " + str(message_id[2]))
+
+def playr(update,context):
+    id_user = str(update.effective_user["id"])
+    name_playlist = str(update.message["text"].split(" ")[1])
+    id_list = str(Obtain_id_list(id_user, name_playlist))
+    cursor = Get_playlistr(id_list)
+    for message_id in cursor:
+        copyMessage(message_id[2], id_user)
+        sendMessage(id_user, "Código de Canción : " + str(message_id[2]))
+
+def deleteplaylist(update,context):
+    id_user = str(update.effective_user["id"])
+    name_playlist = str(update.message["text"].split(" ")[1])
+    id_list = str(Obtain_id_list(id_user, name_playlist))
+    cursor = Delete_playlist(id_list)
+    print(cursor)
+
+def listplaylists(update,context):
+    id_user = str(update.effective_user["id"])
+    listas = Get_userlists(id_user)
+    mensaje = "Las listas existentes son: "
+
+    for lista in listas:
+        canciones = Get_songs_in_list(str(lista[0]))
+        mensaje = "\n"+ mensaje + str(lista[1]) + " contiene: "
+        for cancion in canciones:
+            mensaje = "\n *"+ cancion[3]+ "("+str(cancion[1])+")"
+    
+    print(mensaje)
+    mensaje=""    
 
 if __name__ == "__main__":
     my_bot = telegram.Bot(token = TOKEN)
@@ -142,6 +187,13 @@ dp.add_handler(CommandHandler("search", search))
 dp.add_handler(CommandHandler("createuser", createuser))
 dp.add_handler(CommandHandler("createlist", createlist))
 dp.add_handler(CommandHandler("addtolist", addtolist))
+dp.add_handler(CommandHandler("play", play))
+dp.add_handler(CommandHandler("playr", playr))
+dp.add_handler(CommandHandler("deleteplaylist", deleteplaylist))
+dp.add_handler(CommandHandler("rmfromlist", removefromlist))
+dp.add_handler(CommandHandler("listplaylists", listplaylists))
+dp.add_handler(CommandHandler("post_author", post_author))
+
 
 
 updater.start_polling()

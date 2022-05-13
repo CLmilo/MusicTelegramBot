@@ -2,7 +2,7 @@ from sqlite3 import connect
 import requests
 import telegram
 from telethon import TelegramClient
-from connect import INSERT_SONG
+from connect import INSERT_NAME_SONG, INSERT_SONG
 
 with open('.token') as file:
     token = file.readlines()
@@ -24,14 +24,21 @@ def Inserccion_masiva_canciones():
             for tag in str(message.text).split('#'):
                 if (tag!=""):
                     INSERT_SONG(message.id,tag) 
-         
 
+def Inserccion_masiva_nombres_canciones():
+    for message in client.iter_messages(group_username, reverse=True):
+        try:
+            name_song=str(message.media.document.attributes[0].performer)+" - " + str(message.media.document.attributes[0].title)
+            INSERT_NAME_SONG(message.id,name_song)
+        except:
+            print("error")
+            pass
+
+Inserccion_masiva_nombres_canciones()
 def setWebhook():
     url = "https://api.telegram.org/bot"+TOKEN+"/setWebhook"
     parameters = {
         "url" : "207.246.76.77:8443"
     }
     resp = requests.get(url, data = parameters)
-
-Inserccion_masiva_canciones()
 

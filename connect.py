@@ -14,6 +14,17 @@ def INSERT_SONG(p_message_id, p_tag):
     cursor.execute(sql, datos)
     conn.commit()
 
+def INSERT_NAME_SONG(p_message_id, p_name):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    # Insercción de datos
+    sql="insert into public.name_songs(message_id, name_song) values (%s,%s)"
+    datos = (p_message_id, p_name)
+    cursor.execute(sql, datos)
+    conn.commit()
+
 def Buscar_Message_id_or(param):
     conn = None
     params = config()
@@ -51,6 +62,7 @@ def Create_list(p_user_id, p_nombre_lista):
     datos = (p_user_id, p_nombre_lista)
     cursor.execute(sql, datos)
     conn.commit()
+    return cursor
 
 def Obtain_id_list(p_user_id, p_nombre_lista):
     conn = None
@@ -95,17 +107,11 @@ def Get_max_song(p_id_user):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-<<<<<<< HEAD
     sql = "Select * from public.users where id_user = '"+p_id_user+"'"
     cursor.execute(sql)
     for message in cursor:
-        print(message[0])
-    return message[0]
-=======
-    cursor.execute("Select max_song from public.users where id_user ='"+p_id_user+"'")
-    print(cursor)
-    return cursor
->>>>>>> a1fbee090a31b3066a1f0ad2c3e3212beb419dd1
+        print(message[2])
+    return message[2]
 
 def Get_post_author(p_id_user):
     conn = None
@@ -115,15 +121,71 @@ def Get_post_author(p_id_user):
     cursor.execute("SELECT post_author from public.users where id_user ='"+p_id_user+"'")
     return cursor
 
+def Get_userlists(p_id_user):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("select * from public.lists where id_user ='"+p_id_user+"'")
+    return cursor
+
+def Get_songs_in_list(p_id_list):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("select * from public.songs_list, public.name_songs where (songs_list.id_lista ='"+p_id_list+"' and songs_list.message_id=name_songs.message_id)")
+    return cursor
+
+def List_Song(p_messages_id):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    #p_messages_id = '1','2','3','4'
+    cursor.execute("select * from public.songs where id_lista in ("+p_messages_id+")")
+    return cursor
+
 def Get_playlist(p_id_list):
     conn = None
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    cursor.execute("select * from public.songs_list where id_list ='"+p_id_list+"'")
+    cursor.execute("select * from public.songs_list where id_lista ='"+p_id_list+"'")
     return cursor
 
+def Get_playlistr(p_id_list):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("select random() as random, * from public.songs_list where id_lista ='"+p_id_list+"' order by random")
+    return cursor
 
+def Delete_playlist(p_id_list):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    sql="Delete from public.songs_list where id_lista = %s"
+    datos = (p_id_list)
+    cursor.execute(sql, datos)
+    conn.commit()
+    sql="Delete from public.lists where id_lista = %s"
+    datos = (p_id_list)
+    cursor.execute(sql, datos)
+    conn.commit()
+    return(cursor)
+
+def Delete_song_in_playlist(p_id_list, message_id):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    sql="Delete from public.songs_list where (id_lista = %s and message_id = %s)"
+    datos = (p_id_list ,message_id)
+    cursor.execute(sql, datos)
+    conn.commit()
 #if __name__ == '__main__':
 #    connect()
 
