@@ -102,7 +102,7 @@ def Get_post_author(p_id_user):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    cursor.execute("SELECT post_author from public.users where id_user = "+p_id_user)
+    cursor.execute("SELECT post_author from public.users where id_user ='"+p_id_user"'")
     return cursor
 
 #if __name__ == '__main__':
