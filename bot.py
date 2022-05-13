@@ -100,7 +100,8 @@ def search(update,context):
     lista_tag=[]
     cant=len(lista_tag)-1
     cant=str(cant)
-    max_songs = int(Get_max_song(str(chat_id)))
+    max_songs = Get_max_song(str(chat_id))
+    print(max_songs)
     cursor = Buscar_Message_id_and(param,cant).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
