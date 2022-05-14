@@ -41,7 +41,7 @@ def Buscar_Message_id_and(param,cant):
     cursor = conn.cursor()
     #param = 'anime', 'opening'
     #cursor.execute("SELECT RANDOM() as random, message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+"order by random")
-    cursor.execute("SELECT RANDOM() AS random, * from(SELECT DISTINCT ON (message_id) * FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda1 WHERE(message_id) IN(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+")) order by random")
+    cursor.execute("SELECT RANDOM() AS random, * from(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda group by message_id having count(message_id)>"+cant+") as busqueda2 order by random")
     return cursor
 
 def Create_user(p_user_id,p_nombre_user, maxsong=20, post_author='all'):
