@@ -4,7 +4,7 @@ import requests
 import re
 import telegram
 from telegram.ext import Updater, CommandHandler
-from connect import hard, Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
+from connect import Get_last_id_song, Inserccion_forzada_canciones, Inserccion_forzada_nombres_canciones, Inserccion_masiva_canciones_update, Inserccion_masiva_nombres_canciones_update, hard, Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
 
 #p_offset="266734324"
 
@@ -55,23 +55,23 @@ def help(update, context):
 
 def createuser(update,context):
     id = update.effective_user['id']
-    nombre = hard(update.effective_user['first_name']+" "+update.effective_user['last_name'])
+    nombre = str(hard(update.effective_user['first_name']+" "+update.effective_user['last_name']))
     Create_user(id, nombre)
 
 def createlist(update,context):
     id = update.effective_user['id']
-    name_list = hard(update.message['text'].split(" ")[1])
+    name_list = str(hard(update.message['text'].split(" ")[1]))
     cursor = Create_list(id,name_list)
     print (cursor)
 
 def addtolist(update,context):
     id = str(update.effective_user['id'])
     mensaje = update.message['text'].split(" ")
-    name_list = hard(str(mensaje[1]))
+    name_list = str(hard(str(mensaje[1])))
     id_lista = str(Obtain_id_list(id,name_list))
     lista_mensajes = []
     for message_id in mensaje:
-        lista_mensajes.append(hard(message_id))
+        lista_mensajes.append(str(hard(message_id)))
     lista_mensajes.remove("/addtolist")
     lista_mensajes.remove(name_list)
     for message_id in lista_mensajes:
@@ -80,11 +80,11 @@ def addtolist(update,context):
 def removefromlist(update,context):
     id = str(update.effective_user['id'])
     mensaje = update.message['text'].split(" ")
-    name_list = hard(str(mensaje[1]))
+    name_list = str(hard(str(mensaje[1])))
     id_lista = str(Obtain_id_list(id,name_list))
     lista_mensajes = []
     for message_id in mensaje:
-        lista_mensajes.append(hard(message_id))
+        lista_mensajes.append(str(hard(message_id)))
     lista_mensajes.remove("/rmfromlist")
     lista_mensajes.remove(name_list)
     for message_id in lista_mensajes:
@@ -95,13 +95,13 @@ def searchall(update,context):
     chat_id = update.effective_user['id']
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
-        lista_tag.append(hard(tag.lower()))
+        lista_tag.append(str(hard(tag.lower())))
     post_author = "name=" + str(Get_post_author(str(chat_id)))
     if post_author == "name=all":
         pass
     else:
         lista_tag.append(post_author)
-    lista_tag.remove("searchall")
+    lista_tag.remove("/searchall")
     param = re.sub("\[|\]","",str(lista_tag))
     lista_tag=[]
     max_songs = int(Get_max_song(str(chat_id)))
@@ -117,7 +117,7 @@ def search(update,context):
     chat_id = update.effective_user['id']
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
-        lista_tag.append(hard(tag.lower()))
+        lista_tag.append(str(hard(tag.lower())))
     table_author = Get_post_author(str(chat_id))
     for lines in table_author:
         post_author = "name=" + lines[0].lower()
@@ -142,17 +142,17 @@ def search(update,context):
 
 def maxsongs(update,context):
     id_user = str(update.effective_user["id"])
-    nuevo_max = hard(str((update.message['text'].split(" ")[1])))
+    nuevo_max = str(hard(str((update.message['text'].split(" ")[1]))))
     Modify_max_song(id_user, nuevo_max)
 
 def post_author(update,context):
     id_user = str(update.effective_user["id"])
-    post_author = hard(str(update.message['text'])[13:])
+    post_author = str(hard(str(update.message['text'])[13:]))
     Modify_post_author(id_user,post_author)
 
 def play(update,context):
     id_user = str(update.effective_user["id"])
-    name_playlist = hard(str(update.message["text"].split(" ")[1]))
+    name_playlist = str(hard(str(update.message["text"].split(" ")[1])))
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Get_playlist(id_list)
     for message_id in cursor:
@@ -161,7 +161,7 @@ def play(update,context):
 
 def playr(update,context):
     id_user = str(update.effective_user["id"])
-    name_playlist = hard(str(update.message["text"].split(" ")[1]))
+    name_playlist = str(hard(str(update.message["text"].split(" ")[1])))
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Get_playlistr(id_list)
     for message_id in cursor:
@@ -170,7 +170,7 @@ def playr(update,context):
 
 def deleteplaylist(update,context):
     id_user = str(update.effective_user["id"])
-    name_playlist = hard(str(update.message["text"].split(" ")[1]))
+    name_playlist = str(hard(str(update.message["text"].split(" ")[1])))
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Delete_playlist(id_list)
 
@@ -186,7 +186,16 @@ def listplaylists(update,context):
            mensaje = mensaje + "\n  *"+ cancion[3]+ " ("+str(cancion[1])+")"
     sendMessage(id_user,mensaje)
     mensaje=""
-    
+
+def update(update,context):
+    id_last_song= int(Get_last_id_song())
+    Inserccion_masiva_canciones_update(id_last_song)
+    Inserccion_masiva_nombres_canciones_update(id_last_song)
+
+def updatef(update,context):
+    Inserccion_forzada_canciones()
+    Inserccion_forzada_nombres_canciones()
+
 if __name__ == "__main__":
     my_bot = telegram.Bot(token = TOKEN)
     #print(my_bot.getMe())
@@ -209,6 +218,8 @@ dp.add_handler(CommandHandler("rmfromlist", removefromlist))
 dp.add_handler(CommandHandler("showlists", listplaylists))
 dp.add_handler(CommandHandler("post_author", post_author))
 dp.add_handler(CommandHandler("help", help))
+dp.add_handler(CommandHandler("update", update))
+dp.add_handler(CommandHandler("updatef", updatef))
 
 updater.start_polling()
 

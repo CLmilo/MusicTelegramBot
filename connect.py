@@ -2,6 +2,7 @@
 from http.server import executable
 import psycopg2
 from config import config
+from telethon import TelegramClient
 
 def INSERT_SONG(p_message_id, p_tag):
     conn = None
@@ -186,6 +187,83 @@ def Delete_song_in_playlist(p_id_list, message_id):
     cursor.execute(sql, datos)
     conn.commit()
 
+# ACTUALIZACIÓN DE DATOS MANUAL
+with open('.token') as file:
+    token = file.readlines()
+    file.close()
+
+TOKEN = token[0].rstrip("\n")
+api_id = token[1].rstrip("\n")
+api_hash = token[2].rstrip("\n")
+group_username = token[3].rstrip("\n")
+
+client = TelegramClient('owo', api_id, api_hash).start()
+
+def Get_last_id_song():
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("select message_id from songs order by id_tag desc limit 1")
+    for message in cursor:
+        id_lista = message[0]
+    return id_lista
+
+def Inserccion_masiva_canciones_update(id_lista):
+    for message in client.iter_messages(group_username, reverse=True):
+        owner_name = "name="+ str(message.post_author) 
+        INSERT_SONG(message.id,owner_name)
+        if(message.id > int(id_lista)):
+            for tag in str(message.text).split('#'):
+                if (tag!=""):
+                    INSERT_SONG(message.id,tag)
+        else:
+            pass
+def Inserccion_masiva_nombres_canciones_update(id_lista):
+    for message in client.iter_messages(group_username, reverse=True):
+        if(message.id > int(id_lista)):
+            try:
+                name_song=str(message.media.document.attributes[0].performer)+" - " + str(message.media.document.attributes[0].title)
+                INSERT_NAME_SONG(message.id,name_song)
+            except:
+                print("error")
+                pass
+        else:
+            pass
+
+def Inserccion_forzada_canciones():
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("drop table songs")
+    conn.commit()
+    cursor.execute("create table songs(id_tag SERIAL,message_id VARCHAR(10), tag VARCHAR(100))")
+    conn.commit()
+    for message in client.iter_messages(group_username, reverse=True):
+        owner_name = "name="+ str(message.post_author) 
+        INSERT_SONG(message.id,owner_name)
+        for tag in str(message.text).split('#'):
+            if (tag!=""):
+                INSERT_SONG(message.id,tag) 
+def Inserccion_forzada_nombres_canciones():
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("drop table name_songs")
+    conn.commit()
+    cursor.execute("create table name_songs(message_id NUMERIC(9) PRIMARY KEY,name_song VARCHAR(100))")
+    conn.commit()
+    for message in client.iter_messages(group_username, reverse=True):
+        try:
+            name_song=str(message.media.document.attributes[0].performer)+" - " + str(message.media.document.attributes[0].title)
+            INSERT_NAME_SONG(message.id,name_song)
+        except:
+            print("error")
+            pass
+
+
 def hard(input):
     input = input.replace("-","")
     input = input.replace("'","")
@@ -193,7 +271,7 @@ def hard(input):
     input = input.replace("=","")
     input = input.replace('"',"")
     return input
-    
+
 #if __name__ == '__main__':
 #    connect()
 
