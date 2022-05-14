@@ -3,7 +3,7 @@ import requests
 from telethon import TelegramClient
 from connect import INSERT_NAME_SONG, INSERT_SONG
 import psycopg2
-import config
+from config import config
 import time
 
 with open('.token') as file:
@@ -25,18 +25,15 @@ def Get_last_id_song():
     cursor.execute("select message_id from songs order by id_tag desc limit 1")
     for message in cursor:
         id_lista = message[0]
-    print ("hola1")
-    print(id_lista)
     return id_lista
-    
 
 def Inserccion_masiva_canciones_update(id_lista):
     id_lista = int(id_lista)
     print(id_lista)
     for message in client.iter_messages(group_username, reverse=True):
-        owner_name = "name="+ str(message.post_author) 
-        INSERT_SONG(message.id,owner_name)
         if(message.id > int(id_lista)):
+            owner_name = "name="+ str(message.post_author) 
+            INSERT_SONG(message.id,owner_name)
             for tag in str(message.text).split('#'):
                 if (tag!=""):
                     INSERT_SONG(message.id,tag)
@@ -56,6 +53,6 @@ def Inserccion_masiva_nombres_canciones_update(id_lista):
         else:
             pass
 
-id_lista = Get_last_id_song
+id_lista = Get_last_id_song()
 Inserccion_masiva_canciones_update(id_lista)
 Inserccion_masiva_nombres_canciones_update(id_lista)

@@ -193,7 +193,6 @@ def update(update,context):
     id_user = str(update.effective_user["id"])
     mensaje = str(update.message["text"])
     os.system('python3 update.py')
-    
     sendMessage(id_user,"se terminó de ejecutar")
 
 def updatef(update,context):
