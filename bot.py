@@ -46,7 +46,7 @@ def help(update, context):
     /deletelist: Elimine una lista con el formato (/deletelist nombredelista) el nombre de la lista sin espacios(no hay backup tenga cuidado).
     /addtolist: Añada canciones a la lista con el formato(/addtolist nombredelista codigo_cancion1 codigo_cancion2 ...) donde el código de canción lo ves buscando canciones con search.
     /rmfromlist: Remover canciones de una lista con el formato (/rmfromlist nombredelista codigo_cancion1 codigo_cancion2 ...).
-    /listplaylists: Mostar todas tus listas 
+    /showlists: Mostar todas tus listas 
     Reproducción:
     /play: Reproducir una lista en el orden guardado con el formato (/play nombredelista).
     /playr: Reproducir una lista en orden aleatorio con el formato (/playr nombredelista).
@@ -204,9 +204,9 @@ dp.add_handler(CommandHandler("createlist", createlist))
 dp.add_handler(CommandHandler("addtolist", addtolist))
 dp.add_handler(CommandHandler("play", play))
 dp.add_handler(CommandHandler("playr", playr))
-dp.add_handler(CommandHandler("deleteplaylist", deleteplaylist))
+dp.add_handler(CommandHandler("deletelist", deleteplaylist))
 dp.add_handler(CommandHandler("rmfromlist", removefromlist))
-dp.add_handler(CommandHandler("listplaylists", listplaylists))
+dp.add_handler(CommandHandler("showlists", listplaylists))
 dp.add_handler(CommandHandler("post_author", post_author))
 dp.add_handler(CommandHandler("help", help))
 
