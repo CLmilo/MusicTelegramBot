@@ -19,11 +19,10 @@ client = TelegramClient('owo', api_id, api_hash).start()
 def Inserccion_masiva_canciones():
     for message in client.iter_messages(group_username, reverse=True):
         owner_name = "name="+ str(message.post_author) 
-        if (message.id>375):  
-            INSERT_SONG(message.id,owner_name)
-            for tag in str(message.text).split('#'):
-                if (tag!=""):
-                    INSERT_SONG(message.id,tag) 
+        INSERT_SONG(message.id,owner_name)
+        for tag in str(message.text).split('#'):
+            if (tag!=""):
+                INSERT_SONG(message.id,tag) 
 
 def Inserccion_masiva_nombres_canciones():
     for message in client.iter_messages(group_username, reverse=True):
