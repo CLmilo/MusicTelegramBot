@@ -55,12 +55,12 @@ def help(update, context):
 
 def createuser(update,context):
     id = update.effective_user['id']
-    nombre = str(hard(update.effective_user['first_name']+" "+update.effective_user['last_name']))
+    nombre = hard(str(update.effective_user['first_name'])+" "+str(update.effective_user['last_name']))
     Create_user(id, nombre)
 
 def createlist(update,context):
     id = update.effective_user['id']
-    name_list = str(hard(update.message['text'].split(" ")[1]))
+    name_list = hard(str(update.message['text'].split(" ")[1]))
     cursor = Create_list(id,name_list)
     print (cursor)
 
@@ -156,8 +156,8 @@ def play(update,context):
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Get_playlist(id_list)
     for message_id in cursor:
-        copyMessage(message_id[2], id_user)
-        sendMessage(id_user, "Código de Canción : " + str(message_id[2]))
+        copyMessage(message_id[1], id_user)
+        sendMessage(id_user, "Código de Canción : " + str(message_id[1]))
 
 def playr(update,context):
     id_user = str(update.effective_user["id"])

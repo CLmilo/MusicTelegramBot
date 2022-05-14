@@ -1,0 +1,9 @@
+No error handlers are registered, logging exception.
+Traceback (most recent call last):
+  File "/home/telebot/.local/lib/python3.8/site-packages/telegram/ext/dispatcher.py", line 555, in process_update
+    handler.handle_update(update, self, check, context)
+  File "/home/telebot/.local/lib/python3.8/site-packages/telegram/ext/handler.py", line 198, in handle_update
+    return self.callback(update, context)
+  File "./bot.py", line 58, in createuser
+    nombre = str(hard(update.effective_user['first_name']+" "+update.effective_user['last_name']))
+TypeError: can only concatenate str (not "NoneType") to str
