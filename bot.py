@@ -1,17 +1,17 @@
+import time
 import json
 from sqlite3 import paramstyle
 import requests
 import re
+from config import config
 import telegram
 from telegram.ext import Updater, CommandHandler
-from connect import Get_last_id_song, Inserccion_forzada_canciones, Inserccion_forzada_nombres_canciones, Inserccion_masiva_canciones_update, Inserccion_masiva_nombres_canciones_update, hard, Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
-
-#p_offset="266734324"
-
+from connect import hard, Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
+import os
 
 with open('.token') as file:
-    list = file.readlines()
-    TOKEN = list[0].rstrip("\n")
+    lista = file.readlines()
+    TOKEN = lista[0].rstrip("\n")
     file.close()
 
 lista_tag=[]
@@ -187,14 +187,25 @@ def listplaylists(update,context):
     sendMessage(id_user,mensaje)
     mensaje=""
 
+# ACTUALIZACIÓN DE DATOS MANUAL
+
 def update(update,context):
-    id_last_song= int(Get_last_id_song())
-    Inserccion_masiva_canciones_update(id_last_song)
-    Inserccion_masiva_nombres_canciones_update(id_last_song)
+    id_user = str(update.effective_user["id"])
+    mensaje = str(update.message["text"])
+    if(mensaje == "/update"):
+        os.system('python3 update.py')
+    else:
+        pass
+    sendMessage(id_user,"se terminó de ejecutar")
 
 def updatef(update,context):
-    Inserccion_forzada_canciones()
-    Inserccion_forzada_nombres_canciones()
+    id_user = str(update.effective_user["id"])
+    mensaje = str(update.message["text"])
+    if(mensaje == "/updatef"):
+        os.system('python3 updatef.py')
+    else:
+        pass
+    sendMessage(id_user,"se terminó de ejecutar")
 
 if __name__ == "__main__":
     my_bot = telegram.Bot(token = TOKEN)
@@ -203,6 +214,7 @@ if __name__ == "__main__":
 updater = Updater(my_bot.token, use_context=True)
 
 dp = updater.dispatcher
+
 
 #Creamos los manejadores
 dp.add_handler(CommandHandler("searchall", searchall))
@@ -218,8 +230,9 @@ dp.add_handler(CommandHandler("rmfromlist", removefromlist))
 dp.add_handler(CommandHandler("showlists", listplaylists))
 dp.add_handler(CommandHandler("post_author", post_author))
 dp.add_handler(CommandHandler("help", help))
-dp.add_handler(CommandHandler("update", update))
 dp.add_handler(CommandHandler("updatef", updatef))
+dp.add_handler(CommandHandler("update", update))
+
 
 updater.start_polling()
 
