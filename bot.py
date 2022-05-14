@@ -4,9 +4,10 @@ import requests
 import re
 import telegram
 from telegram.ext import Updater, CommandHandler
-from connect import Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
+from connect import hard, Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
 
 #p_offset="266734324"
+
 
 with open('.token') as file:
     list = file.readlines()
@@ -54,23 +55,23 @@ def help(update, context):
 
 def createuser(update,context):
     id = update.effective_user['id']
-    nombre = update.effective_user['first_name']+" "+update.effective_user['last_name']
+    nombre = hard(update.effective_user['first_name']+" "+update.effective_user['last_name'])
     Create_user(id, nombre)
 
 def createlist(update,context):
     id = update.effective_user['id']
-    name_list = update.message['text'].split(" ")[1]
+    name_list = hard(update.message['text'].split(" ")[1])
     cursor = Create_list(id,name_list)
     print (cursor)
 
 def addtolist(update,context):
     id = str(update.effective_user['id'])
     mensaje = update.message['text'].split(" ")
-    name_list = str(mensaje[1])
+    name_list = hard(str(mensaje[1]))
     id_lista = str(Obtain_id_list(id,name_list))
     lista_mensajes = []
     for message_id in mensaje:
-        lista_mensajes.append(message_id)
+        lista_mensajes.append(hard(message_id))
     lista_mensajes.remove("/addtolist")
     lista_mensajes.remove(name_list)
     for message_id in lista_mensajes:
@@ -79,11 +80,11 @@ def addtolist(update,context):
 def removefromlist(update,context):
     id = str(update.effective_user['id'])
     mensaje = update.message['text'].split(" ")
-    name_list = str(mensaje[1])
+    name_list = hard(str(mensaje[1]))
     id_lista = str(Obtain_id_list(id,name_list))
     lista_mensajes = []
     for message_id in mensaje:
-        lista_mensajes.append(message_id)
+        lista_mensajes.append(hard(message_id))
     lista_mensajes.remove("/rmfromlist")
     lista_mensajes.remove(name_list)
     for message_id in lista_mensajes:
@@ -94,7 +95,7 @@ def searchall(update,context):
     chat_id = update.effective_user['id']
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
-        lista_tag.append(tag.lower())
+        lista_tag.append(hard(tag.lower()))
     post_author = "name=" + str(Get_post_author(str(chat_id)))
     if post_author == "name=all":
         pass
@@ -116,7 +117,7 @@ def search(update,context):
     chat_id = update.effective_user['id']
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
-        lista_tag.append(tag.lower())
+        lista_tag.append(hard(tag.lower()))
     table_author = Get_post_author(str(chat_id))
     for lines in table_author:
         post_author = "name=" + lines[0].lower()
@@ -141,17 +142,17 @@ def search(update,context):
 
 def maxsongs(update,context):
     id_user = str(update.effective_user["id"])
-    nuevo_max = str((update.message['text'].split(" ")[1]))
+    nuevo_max = hard(str((update.message['text'].split(" ")[1])))
     Modify_max_song(id_user, nuevo_max)
 
 def post_author(update,context):
     id_user = str(update.effective_user["id"])
-    post_author = str(update.message['text'])[13:]
+    post_author = hard(str(update.message['text'])[13:])
     Modify_post_author(id_user,post_author)
 
 def play(update,context):
     id_user = str(update.effective_user["id"])
-    name_playlist = str(update.message["text"].split(" ")[1])
+    name_playlist = hard(str(update.message["text"].split(" ")[1]))
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Get_playlist(id_list)
     for message_id in cursor:
@@ -160,7 +161,7 @@ def play(update,context):
 
 def playr(update,context):
     id_user = str(update.effective_user["id"])
-    name_playlist = str(update.message["text"].split(" ")[1])
+    name_playlist = hard(str(update.message["text"].split(" ")[1]))
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Get_playlistr(id_list)
     for message_id in cursor:
@@ -169,10 +170,9 @@ def playr(update,context):
 
 def deleteplaylist(update,context):
     id_user = str(update.effective_user["id"])
-    name_playlist = str(update.message["text"].split(" ")[1])
+    name_playlist = hard(str(update.message["text"].split(" ")[1]))
     id_list = str(Obtain_id_list(id_user, name_playlist))
     cursor = Delete_playlist(id_list)
-    print(cursor)
 
 def listplaylists(update,context):
     id_user = str(update.effective_user["id"])
@@ -209,8 +209,6 @@ dp.add_handler(CommandHandler("rmfromlist", removefromlist))
 dp.add_handler(CommandHandler("showlists", listplaylists))
 dp.add_handler(CommandHandler("post_author", post_author))
 dp.add_handler(CommandHandler("help", help))
-
-
 
 updater.start_polling()
 

@@ -185,6 +185,15 @@ def Delete_song_in_playlist(p_id_list, message_id):
     datos = (p_id_list ,message_id)
     cursor.execute(sql, datos)
     conn.commit()
+
+def hard(input):
+    input = input.replace("-","")
+    input = input.replace("'","")
+    input = input.replace("?","")
+    input = input.replace("=","")
+    input = input.replace('"',"")
+    return input
+    
 #if __name__ == '__main__':
 #    connect()
 
