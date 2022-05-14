@@ -25,6 +25,7 @@ def Get_last_id_song():
     cursor.execute("select message_id from songs order by id_tag desc limit 1")
     for message in cursor:
         id_lista = message[0]
+    print ("hola1")
     print(id_lista)
     return id_lista
     
