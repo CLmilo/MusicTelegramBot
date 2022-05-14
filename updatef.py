@@ -54,12 +54,9 @@ def Inserccion_forzada_nombres_canciones():
         except:
             print("error")
             pass
-print("hola1")
+
 recreacion_tabla_songs()
-print("hola2")
 Inserccion_forzada_canciones()
-print("hola3")
 recreacion_tabla_name_songs()
-print("hola4")
 Inserccion_forzada_nombres_canciones()
 

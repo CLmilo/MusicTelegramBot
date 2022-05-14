@@ -29,7 +29,6 @@ def Get_last_id_song():
 
 def Inserccion_masiva_canciones_update(id_lista):
     id_lista = int(id_lista)
-    print(id_lista)
     for message in client.iter_messages(group_username, reverse=True):
         if(message.id > int(id_lista)):
             owner_name = "name="+ str(message.post_author) 
@@ -41,7 +40,6 @@ def Inserccion_masiva_canciones_update(id_lista):
             pass
 def Inserccion_masiva_nombres_canciones_update(id_lista):
     id_lista = int(id_lista)
-    print(id_lista)
     for message in client.iter_messages(group_username, reverse=True):
         if(message.id > int(id_lista)):
             try:
