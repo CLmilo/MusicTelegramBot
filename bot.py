@@ -192,10 +192,8 @@ def listplaylists(update,context):
 def update(update,context):
     id_user = str(update.effective_user["id"])
     mensaje = str(update.message["text"])
-    if(mensaje == "/update"):
-        os.system('python3 update.py')
-    else:
-        pass
+    os.system('python3 update.py')
+    
     sendMessage(id_user,"se terminó de ejecutar")
 
 def updatef(update,context):
