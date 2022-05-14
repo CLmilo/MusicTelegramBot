@@ -3,7 +3,7 @@ import requests
 from telethon import TelegramClient
 from connect import INSERT_NAME_SONG, INSERT_SONG
 import psycopg2
-import config
+from config import config
 import time
 
 with open('.token') as file:
@@ -56,6 +56,6 @@ def Inserccion_masiva_nombres_canciones_update(id_lista):
         else:
             pass
 
-id_lista = Get_last_id_song
+id_lista = Get_last_id_song()
 Inserccion_masiva_canciones_update(id_lista)
 Inserccion_masiva_nombres_canciones_update(id_lista)
