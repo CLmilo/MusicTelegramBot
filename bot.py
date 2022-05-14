@@ -201,10 +201,7 @@ def update(update,context):
 def updatef(update,context):
     id_user = str(update.effective_user["id"])
     mensaje = str(update.message["text"])
-    if(mensaje == "/updatef"):
-        os.system('python3 updatef.py')
-    else:
-        pass
+    os.system('python3 updatef.py')
     sendMessage(id_user,"se terminó de ejecutar")
 
 if __name__ == "__main__":
