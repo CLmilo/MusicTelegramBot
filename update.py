@@ -26,7 +26,6 @@ def Get_last_id_song():
     for message in cursor:
         id_lista = message[0]
     print(id_lista)
-    conn.close()
     return id_lista
     
 
@@ -52,6 +51,6 @@ def Inserccion_masiva_nombres_canciones_update(id_lista):
         else:
             pass
 
-id_lista = int(Get_last_id_song)
-Inserccion_masiva_canciones_update()
-Inserccion_masiva_nombres_canciones_update()
+id_lista = Get_last_id_song
+Inserccion_masiva_canciones_update(id_lista)
+Inserccion_masiva_nombres_canciones_update(id_lista)
