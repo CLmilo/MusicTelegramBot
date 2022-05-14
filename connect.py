@@ -40,7 +40,8 @@ def Buscar_Message_id_and(param,cant):
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
     #param = 'anime', 'opening'
-    cursor.execute("SELECT RANDOM() as random, message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+"order by random")
+    #cursor.execute("SELECT RANDOM() as random, message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+"order by random")
+    cursor.execute("SELECT RANDOM() AS random, * from(SELECT DISTINCT ON (message_id) * FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda1 WHERE(message_id) IN(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+")) order by random")
     return cursor
 
 def Create_user(p_user_id,p_nombre_user, maxsong=20, post_author='all'):
@@ -109,9 +110,7 @@ def Get_max_song(p_id_user):
     cursor = conn.cursor()
     sql = "Select * from public.users where id_user = '"+p_id_user+"'"
     cursor.execute(sql)
-    for message in cursor:
-        print(message[2])
-    return message[2]
+    return cursor
 
 def Get_post_author(p_id_user):
     conn = None

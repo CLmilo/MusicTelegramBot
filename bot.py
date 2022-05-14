@@ -117,17 +117,24 @@ def search(update,context):
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
         lista_tag.append(tag.lower())
-    post_author = "name=" + str(Get_post_author(str(chat_id)))
+    table_author = Get_post_author(str(chat_id))
+    for lines in table_author:
+        post_author = "name=" + lines[0].lower()
     if post_author == "name=all":
         pass
     else:
         lista_tag.append(post_author)
     lista_tag.remove("/search")
     param = re.sub("\[|\]","",str(lista_tag))
-    lista_tag=[]
+    print(lista_tag)
     cant=len(lista_tag)-1
+    lista_tag=[]
     cant=str(cant)
-    max_songs = int(Get_max_song(str(chat_id)))
+    print ("\nelementos cantidad : " + cant)
+    table_max_songs = Get_max_song(str(chat_id))
+    for num in table_max_songs:
+        max_songs = int(num[2])
+    print("\nmaximo de canciones:" + str(max_songs))
     cursor = Buscar_Message_id_and(param,cant).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")

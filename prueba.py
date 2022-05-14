@@ -34,7 +34,9 @@ def Inserccion_masiva_nombres_canciones():
             print("error")
             pass
 
-Inserccion_masiva_nombres_canciones()
+#Inserccion_masiva_nombres_canciones()
+Inserccion_masiva_canciones()
+
 def setWebhook():
     url = "https://api.telegram.org/bot"+TOKEN+"/setWebhook"
     parameters = {
