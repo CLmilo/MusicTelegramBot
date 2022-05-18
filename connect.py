@@ -41,8 +41,6 @@ def Buscar_Message_id_and(param):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    #param = ['anime', 'opening']
-    #cursor.execute("SELECT RANDOM() as random, message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+"order by random")
     SQL = ""
     cant = len(param)
     cont = 0
@@ -55,7 +53,6 @@ def Buscar_Message_id_and(param):
         SQL = SQL + " SELECT DISTINCT message_id FROM public.songs where (lower(TRIM(tag)) LIKE any (array['%"+string+"%'])) "+conector
     SQL = "SELECT RANDOM() AS random, * from("+SQL+") as busqueda2 order by random"
     cursor.execute(SQL)
-    #cursor.execute("SELECT RANDOM() AS random, * from(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda group by message_id having count(message_id)>"+cant+") as busqueda2 order by random")
     return cursor
 
 def Create_user(p_user_id,p_nombre_user, maxsong=20, post_author='all'):

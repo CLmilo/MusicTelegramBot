@@ -126,9 +126,6 @@ def search(update,context):
     else:
         lista_tag.append(post_author)
     lista_tag.remove("/search")
-    #param = re.sub("\[|\]","",str(lista_tag))
-    #cant=len(lista_tag)-1
-    #cant=str(cant)
     table_max_songs = Get_max_song(str(chat_id))
     for num in table_max_songs:
         max_songs = int(num[2])
