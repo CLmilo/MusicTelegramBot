@@ -127,13 +127,12 @@ def search(update,context):
         lista_tag.append(post_author)
     lista_tag.remove("/search")
     #param = re.sub("\[|\]","",str(lista_tag))
-    cant=len(lista_tag)-1
-    
-    cant=str(cant)
+    #cant=len(lista_tag)-1
+    #cant=str(cant)
     table_max_songs = Get_max_song(str(chat_id))
     for num in table_max_songs:
         max_songs = int(num[2])
-    cursor = Buscar_Message_id_and(lista_tag,cant).fetchmany(max_songs)
+    cursor = Buscar_Message_id_and(lista_tag).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
     for message_id in cursor:
