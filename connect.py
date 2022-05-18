@@ -36,14 +36,26 @@ def Buscar_Message_id_or(param):
     cursor.execute("SELECT distinct on (message_id) * FROM public.songs where lower(TRIM(tag)) in ("+param+")")
     return cursor
 
-def Buscar_Message_id_and(param,cant):
+def Buscar_Message_id_and(param):
     conn = None
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    #param = 'anime', 'opening'
+    #param = ['anime', 'opening']
     #cursor.execute("SELECT RANDOM() as random, message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda GROUP BY message_id HAVING count(*)>"+cant+"order by random")
-    cursor.execute("SELECT RANDOM() AS random, * from(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda group by message_id having count(message_id)>"+cant+") as busqueda2 order by random")
+    SQL = ""
+    cant = len(param)
+    cont = 0
+    for string in param:
+        cont = cont + 1
+        if (cont == cant):
+            conector = ""
+        else:
+            conector = " INTERSECT "
+        SQL = SQL + " SELECT DISTINCT message_id FROM public.songs where (lower(TRIM(tag)) LIKE any (array['%"+string+"%'])) "+conector
+    SQL = "SELECT RANDOM() AS random, * from("+SQL+") as busqueda2 order by random"
+    cursor.execute(SQL)
+    #cursor.execute("SELECT RANDOM() AS random, * from(SELECT message_id FROM (SELECT * FROM public.songs where (lower(TRIM(tag)) IN ("+param+"))) as busqueda group by message_id having count(message_id)>"+cant+") as busqueda2 order by random")
     return cursor
 
 def Create_user(p_user_id,p_nombre_user, maxsong=20, post_author='all'):
