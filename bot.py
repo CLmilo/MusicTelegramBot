@@ -52,6 +52,7 @@ def help(update, context):
     /play: Reproducir una lista en el orden guardado con el formato (/play nombredelista).
     /playr: Reproducir una lista en orden aleatorio con el formato (/playr nombredelista).
     /playex: Reproducir una lista en orden aleatorio de un usuario diferente con el formato (/playex nombreusuario nombredelista).
+    /status: muestra tu status.
     """)
 
 def atajos(update, context):
@@ -69,6 +70,7 @@ def atajos(update, context):
     /p: /play
     /pr: /playr
     /pex: /playex
+    /st: /status
     """)
 
 def createuser(update,context):
