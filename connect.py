@@ -33,7 +33,7 @@ def Buscar_Message_id_or(param):
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
     #param = 'anime', 'opening'
-    cursor.execute("SELECT distinct on (message_id) * FROM public.songs where lower(TRIM(tag)) in ("+param+")")
+    cursor.execute("SELECT distinct on (message_id) * FROM public.songs where lower(replace(tag,' ', '')) in ("+param+")")
     return cursor
 
 def Buscar_Message_id_and(param):
@@ -50,10 +50,18 @@ def Buscar_Message_id_and(param):
             conector = ""
         else:
             conector = " INTERSECT "
-        SQL = SQL + " SELECT DISTINCT message_id FROM public.songs where (lower(TRIM(tag)) LIKE any (array['%"+string+"%'])) "+conector
+        SQL = SQL + " SELECT DISTINCT message_id FROM public.songs where (lower(replace(tag,' ', '')) LIKE any (array['%"+string+"%'])) "+conector
     SQL = "SELECT RANDOM() AS random, * from("+SQL+") as busqueda2 order by random"
     cursor.execute(SQL)
     return cursor
+
+def Buscar_Message_id_and_exacto(param,cant):
+    conn = None
+    params = config()
+    conn = psycopg2.connect(**params)
+    cursor = conn.cursor()
+    cursor.execute("SELECT RANDOM() AS random, * from(SELECT message_id FROM (SELECT * FROM public.songs where (lower(replace(tag,' ', '')) IN ("+param+"))) as busqueda group by message_id having count(message_id)>"+cant+") as busqueda2 order by random")
+    return cursor    
 
 def Create_user(p_user_id,p_nombre_user, maxsong=20, post_author='all'):
     conn = None
@@ -114,7 +122,7 @@ def Modify_max_song(p_id_user, p_max_song):
     cursor.execute("update public.users set max_song = "+p_max_song+" where id_user ='"+p_id_user+"'")
     conn.commit()
 
-def Get_max_song(p_id_user):
+def Get_user_info(p_id_user):
     conn = None
     params = config()
     conn = psycopg2.connect(**params)
@@ -123,12 +131,13 @@ def Get_max_song(p_id_user):
     cursor.execute(sql)
     return cursor
 
-def Get_post_author(p_id_user):
+def Get_external_user_info(p_nombre):
     conn = None
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    cursor.execute("SELECT post_author from public.users where id_user ='"+p_id_user+"'")
+    sql = "Select id_user from public.users where nombre_user = '"+p_nombre+"'"
+    cursor.execute(sql)
     return cursor
 
 def Get_userlists(p_id_user):
@@ -177,13 +186,9 @@ def Delete_playlist(p_id_list):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    sql="Delete from public.songs_list where id_lista = %s"
-    datos = (p_id_list)
-    cursor.execute(sql, datos)
+    cursor.execute("Delete from public.songs_list where id_lista = '"+p_id_list+"'")
     conn.commit()
-    sql="Delete from public.lists where id_lista = %s"
-    datos = (p_id_list)
-    cursor.execute(sql, datos)
+    cursor.execute("Delete from public.lists where id_lista = '"+p_id_list+"'")
     conn.commit()
     return(cursor)
 

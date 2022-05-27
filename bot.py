@@ -6,7 +6,7 @@ import re
 from config import config
 import telegram
 from telegram.ext import Updater, CommandHandler
-from connect import hard, Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_max_song, Get_playlistr, Get_post_author, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
+from connect import Buscar_Message_id_and_exacto, Get_external_user_info, Get_user_info, hard, Add_to_list, Buscar_Message_id_and, Buscar_Message_id_or, Create_user, Create_list, Delete_playlist, Delete_song_in_playlist, Get_playlistr, Get_songs_in_list, Get_userlists, Modify_max_song, Modify_post_author, Obtain_id_list, Get_playlist
 import os
 
 with open('.token') as file:
@@ -51,18 +51,46 @@ def help(update, context):
     Reproducción:
     /play: Reproducir una lista en el orden guardado con el formato (/play nombredelista).
     /playr: Reproducir una lista en orden aleatorio con el formato (/playr nombredelista).
+    /playex: Reproducir una lista en orden aleatorio de un usuario diferente con el formato (/playex nombreusuario nombredelista).
+    """)
+
+def atajos(update, context):
+    id_chat = update.effective_user['id']
+    sendMessage(id_chat, """ ATAJOS:
+    /sr : /search
+    /sra : /searchall
+    /ms: /maxsongs
+    /pa: /post_author
+    /cl: /createlist
+    /dl: /deletelist
+    /atl: /addtolist
+    /rfl: /rmfromlist
+    /sl: /showlists
+    /p: /play
+    /pr: /playr
+    /pex: /playex
     """)
 
 def createuser(update,context):
-    id = update.effective_user['id']
-    nombre = hard(str(update.effective_user['first_name'])+" "+str(update.effective_user['last_name']))
-    Create_user(id, nombre)
+    chat_id = update.effective_user['id']
+    lastname = str(update.effective_user['last_name'])
+    if lastname == "None":
+        lastname = ""
+    nombre = hard(str(update.effective_user['first_name'])+lastname).strip()
+    try:
+        Create_user(chat_id, nombre)
+        sendMessage(chat_id, "Usuario creado con éxito")
+    except:
+        sendMessage(chat_id, "Usuario no creado, mandar mensaje a https://t.me/Cl_Milo") 
 
 def createlist(update,context):
-    id = update.effective_user['id']
+    chat_id = update.effective_user['id']
     name_list = hard(str(update.message['text'].split(" ")[1]))
-    cursor = Create_list(id,name_list)
-    print (cursor)
+    try:
+        Create_list(chat_id,name_list)
+        sendMessage(chat_id, "Lista creada con el nombre "+name_list) 
+    except:
+        sendMessage(chat_id, "Lista no creada, mandar mensaje a https://t.me/Cl_Milo") 
 
 def addtolist(update,context):
     id = str(update.effective_user['id'])
@@ -72,7 +100,10 @@ def addtolist(update,context):
     lista_mensajes = []
     for message_id in mensaje:
         lista_mensajes.append(str(hard(message_id)))
-    lista_mensajes.remove("/addtolist")
+    try:
+        lista_mensajes.remove("/addtolist")
+    except:
+        lista_mensajes.remove("/atl")
     lista_mensajes.remove(name_list)
     for message_id in lista_mensajes:
         Add_to_list(id_lista, message_id)
@@ -85,7 +116,10 @@ def removefromlist(update,context):
     lista_mensajes = []
     for message_id in mensaje:
         lista_mensajes.append(str(hard(message_id)))
-    lista_mensajes.remove("/rmfromlist")
+    try:
+        lista_mensajes.remove("/rmfromlist")
+    except:
+        lista_mensajes.remove("/rfl")
     lista_mensajes.remove(name_list)
     for message_id in lista_mensajes:
         Delete_song_in_playlist(id_lista, message_id)
@@ -96,21 +130,28 @@ def searchall(update,context):
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
         lista_tag.append(str(hard(tag.lower())))
-    post_author = "name=" + str(Get_post_author(str(chat_id)))
+    table_info_user = Get_user_info(str(chat_id))
+    for num in table_info_user:
+        max_songs = int(num[2])
+        post_author = "name=" + str(num[3]).strip().lower()    
     if post_author == "name=all":
         pass
     else:
         lista_tag.append(post_author)
-    lista_tag.remove("/searchall")
+    try:
+        lista_tag.remove("/searchall")
+    except:
+        lista_tag.remove("/sra")
     param = re.sub("\[|\]","",str(lista_tag))
-    lista_tag=[]
-    max_songs = int(Get_max_song(str(chat_id)))
-    cursor = Buscar_Message_id_or(param).fetchmany(max_songs)
-    if (cursor==""):
+    try:
+        cursor = Buscar_Message_id_or(param).fetchmany(max_songs)
+        for message_id in cursor:
+            copyMessage(message_id[1],chat_id)
+            sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
+        lista_tag=[]
+    except:
         sendMessage(chat_id,"No hay resultados")
-    for message_id in cursor:
-        copyMessage(message_id[1],chat_id)
-        sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
+
 
 def search(update,context):
     lista_tag=[]
@@ -118,18 +159,49 @@ def search(update,context):
     caption_mensaje_actual = update.message['text'].split(" ")
     for tag in caption_mensaje_actual:
         lista_tag.append(str(hard(tag.lower())))
-    table_author = Get_post_author(str(chat_id))
-    for lines in table_author:
-        post_author = "name=" + lines[0].lower()
+    table_info_user = Get_user_info(str(chat_id))
+    for num in table_info_user:
+        max_songs = int(num[2])
+        post_author = "name=" + str(num[3]).strip().lower()    
     if post_author == "name=all":
         pass
     else:
         lista_tag.append(post_author)
-    lista_tag.remove("/search")
-    table_max_songs = Get_max_song(str(chat_id))
-    for num in table_max_songs:
+    try:
+        lista_tag.remove("/search")
+    except:
+        lista_tag.remove("/sr")
+    try:
+        cursor = Buscar_Message_id_and(lista_tag).fetchmany(max_songs)
+        for message_id in cursor:
+            copyMessage(message_id[1],chat_id)
+            sendMessage(chat_id, "Código de Canción : "+str(message_id[1]))
+        lista_tag=[]
+    except:
+        sendMessage(chat_id,"No hay resultados")
+    
+
+def searchexacto(update,context):
+    lista_tag=[]
+    chat_id = update.effective_user['id']
+    caption_mensaje_actual = update.message['text'].split(" ")
+    for tag in caption_mensaje_actual:
+        lista_tag.append(str(hard(tag.lower())))
+    table_info_user = Get_user_info(str(chat_id))
+    for num in table_info_user:
         max_songs = int(num[2])
-    cursor = Buscar_Message_id_and(lista_tag).fetchmany(max_songs)
+        post_author = "name=" + str(num[3]).strip().lower()    
+    if post_author == "name=all":
+        pass
+    else:
+        lista_tag.append(post_author)
+    try:
+        lista_tag.remove("/searchx")
+    except:
+        lista_tag.remove("/srx")
+    cant = len(lista_tag) -1 
+    param = re.sub("\[|\]","",str(lista_tag))
+    cursor = Buscar_Message_id_and_exacto(param,str(cant)).fetchmany(max_songs)
     if (cursor==""):
         sendMessage(chat_id,"No hay resultados")
     for message_id in cursor:
@@ -144,14 +216,21 @@ def maxsongs(update,context):
 
 def post_author(update,context):
     id_user = str(update.effective_user["id"])
-    post_author = str(hard(str(update.message['text'])[13:]))
+    mensaje = str(hard(str(update.message['text'])))
+    if mensaje[0:3]=="/pa":
+        post_author = mensaje[3:]
+    else :
+        post_author = str(hard(str(update.message['text'])[13:]))
     Modify_post_author(id_user,post_author)
 
 def play(update,context):
     id_user = str(update.effective_user["id"])
     name_playlist = str(hard(str(update.message["text"].split(" ")[1])))
     id_list = str(Obtain_id_list(id_user, name_playlist))
-    cursor = Get_playlist(id_list)
+    table_info_user = Get_user_info(str(id_user))
+    for num in table_info_user:
+        max_songs = int(num[2])
+    cursor = Get_playlist(id_list).fetchmany(max_songs)
     for message_id in cursor:
         copyMessage(message_id[1], id_user)
         sendMessage(id_user, "Código de Canción : " + str(message_id[1]))
@@ -160,16 +239,40 @@ def playr(update,context):
     id_user = str(update.effective_user["id"])
     name_playlist = str(hard(str(update.message["text"].split(" ")[1])))
     id_list = str(Obtain_id_list(id_user, name_playlist))
-    cursor = Get_playlistr(id_list)
+    table_info_user = Get_user_info(str(id_user))
+    for num in table_info_user:
+        max_songs = int(num[2])
+    cursor = Get_playlistr(id_list).fetchmany(max_songs)
     for message_id in cursor:
         copyMessage(message_id[2], id_user)
         sendMessage(id_user, "Código de Canción : " + str(message_id[2]))
+
+def playexternallist(update,context):
+    id_user = str(update.effective_user["id"])
+    name_external_user = str(hard(str(update.message["text"].split(" ")[1])))
+    name_playlist = str(hard(str(update.message["text"].split(" ")[2])))
+    datos = Get_external_user_info(name_external_user)
+    for linea in datos:
+        id_user_external = linea[0]
+    id_list = str(Obtain_id_list(id_user_external, name_playlist))
+    table_info_user = Get_user_info(str(id_user))
+    for num in table_info_user:
+        max_songs = int(num[2])
+    try :
+        cursor = Get_playlistr(id_list).fetchmany(max_songs)
+        for message_id in cursor:
+            copyMessage(message_id[2], id_user)
+            sendMessage(id_user, "Código de Canción : " + str(message_id[2]))
+    except:
+        sendMessage(id_user, "No existe la lista")
 
 def deleteplaylist(update,context):
     id_user = str(update.effective_user["id"])
     name_playlist = str(hard(str(update.message["text"].split(" ")[1])))
     id_list = str(Obtain_id_list(id_user, name_playlist))
+    print(id_user + name_playlist + id_list)
     cursor = Delete_playlist(id_list)
+    
 
 def listplaylists(update,context):
     id_user = str(update.effective_user["id"])
@@ -183,6 +286,17 @@ def listplaylists(update,context):
            mensaje = mensaje + "\n  *"+ cancion[3]+ " ("+str(cancion[1])+")"
     sendMessage(id_user,mensaje)
     mensaje=""
+
+def status(update,context):
+    id_user = str(update.effective_user["id"])
+    datos = Get_user_info(id_user)
+    for linea in datos:
+        nombre_user = str(linea[1])
+        max_songs = str(linea[2])
+        post_author = str(linea[3])
+    mensaje = "Nombre de Usuario: "+nombre_user+" \nCantidad máxima de songs: "+max_songs+" \nAutor Preferencia: "+post_author
+    sendMessage(id_user,mensaje)
+
 
 # ACTUALIZACIÓN DE DATOS MANUAL
 
@@ -211,11 +325,13 @@ dp = updater.dispatcher
 dp.add_handler(CommandHandler("searchall", searchall))
 dp.add_handler(CommandHandler("maxsongs", maxsongs))
 dp.add_handler(CommandHandler("search", search))
+dp.add_handler(CommandHandler("searchx",searchexacto))
 dp.add_handler(CommandHandler("createuser", createuser))
 dp.add_handler(CommandHandler("createlist", createlist))
 dp.add_handler(CommandHandler("addtolist", addtolist))
 dp.add_handler(CommandHandler("play", play))
 dp.add_handler(CommandHandler("playr", playr))
+dp.add_handler(CommandHandler("playex",playexternallist))
 dp.add_handler(CommandHandler("deletelist", deleteplaylist))
 dp.add_handler(CommandHandler("rmfromlist", removefromlist))
 dp.add_handler(CommandHandler("showlists", listplaylists))
@@ -223,6 +339,24 @@ dp.add_handler(CommandHandler("post_author", post_author))
 dp.add_handler(CommandHandler("help", help))
 dp.add_handler(CommandHandler("updatef", updatef))
 dp.add_handler(CommandHandler("update", update))
+dp.add_handler(CommandHandler("atajos", atajos))
+dp.add_handler(CommandHandler("status", status))
+
+#Atajos
+dp.add_handler(CommandHandler("sra", searchall))
+dp.add_handler(CommandHandler("ms", maxsongs))
+dp.add_handler(CommandHandler("sr", search))
+dp.add_handler(CommandHandler("srx",searchexacto))
+dp.add_handler(CommandHandler("cl", createlist))
+dp.add_handler(CommandHandler("atl", addtolist))
+dp.add_handler(CommandHandler("p", play))
+dp.add_handler(CommandHandler("pr", playr))
+dp.add_handler(CommandHandler("pex",playexternallist))
+dp.add_handler(CommandHandler("dl", deleteplaylist))
+dp.add_handler(CommandHandler("rfl", removefromlist))
+dp.add_handler(CommandHandler("sl", listplaylists))
+dp.add_handler(CommandHandler("pa", post_author))
+dp.add_handler(CommandHandler("st", status))
 
 
 updater.start_polling()
