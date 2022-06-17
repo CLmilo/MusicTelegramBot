@@ -39,15 +39,17 @@ def help(update, context):
     Ingrese los tags a buscar en formato (/search param1 param2 ...) or (/searchall): 
     /search : Búsqueda de canciones que tengan todos los tags puestos.
     /searchall : Búsqueda de todas las canciones que cumplan con al menos uno de los tags puestos.
+    /searchx : Búsqueda exacta de los parámetros que le pongas (/search param1 param2) busca canciones que el tag sea "param1" con exactitud.
     Opciones de búsqueda:
     /maxsongs: Número máximo de mensajes de respuesta (default=20). 
-    /post_author: Persona que ha subido la canción (ver su nombre en el canal), si deseas regresar a buscar todos colocar "all".
+    /post_author: Persona que ha subido la canción (ver su nombre en el canal) (/post_author nombrepersona), si deseas regresar a buscar todos colocar "all".
     Opciones de lista:
     /createlist: Cree una lista con el formato (/createlist nombredelista) el nombre de la lista sin espacios.
     /deletelist: Elimine una lista con el formato (/deletelist nombredelista) el nombre de la lista sin espacios(no hay backup tenga cuidado).
     /addtolist: Añada canciones a la lista con el formato(/addtolist nombredelista codigo_cancion1 codigo_cancion2 ...) donde el código de canción lo ves buscando canciones con search.
     /rmfromlist: Remover canciones de una lista con el formato (/rmfromlist nombredelista codigo_cancion1 codigo_cancion2 ...).
-    /showlists: Mostar todas tus listas 
+    /showlists: Mostar todas tus listas
+    /showexlists: Mostrar listas de otras personas (/showexlists nombrepersona) 
     Reproducción:
     /play: Reproducir una lista en el orden guardado con el formato (/play nombredelista).
     /playr: Reproducir una lista en orden aleatorio con el formato (/playr nombredelista).
@@ -60,6 +62,7 @@ def atajos(update, context):
     sendMessage(id_chat, """ ATAJOS:
     /sr : /search
     /sra : /searchall
+    /srx : /searchx
     /ms: /maxsongs
     /pa: /post_author
     /cl: /createlist
@@ -67,6 +70,7 @@ def atajos(update, context):
     /atl: /addtolist
     /rfl: /rmfromlist
     /sl: /showlists
+    /sel: /showexlists
     /p: /play
     /pr: /playr
     /pex: /playex
@@ -95,10 +99,10 @@ def createlist(update,context):
         sendMessage(chat_id, "Lista no creada, mandar mensaje a https://t.me/Cl_Milo") 
 
 def addtolist(update,context):
-    id = str(update.effective_user['id'])
+    user_id = str(update.effective_user['id'])
     mensaje = update.message['text'].split(" ")
     name_list = str(hard(str(mensaje[1])))
-    id_lista = str(Obtain_id_list(id,name_list))
+    id_lista = str(Obtain_id_list(user_id,name_list))
     lista_mensajes = []
     for message_id in mensaje:
         lista_mensajes.append(str(hard(message_id)))
@@ -107,8 +111,12 @@ def addtolist(update,context):
     except:
         lista_mensajes.remove("/atl")
     lista_mensajes.remove(name_list)
+    mensaje_enviar = ""
     for message_id in lista_mensajes:
-        Add_to_list(id_lista, message_id)
+        mensaje_enviar += str(Add_to_list(id_lista, message_id)) + "\n"
+        print(mensaje_enviar)
+    
+    sendMessage(user_id,mensaje_enviar)
 
 def removefromlist(update,context):
     id = str(update.effective_user['id'])
@@ -249,6 +257,19 @@ def playr(update,context):
         copyMessage(message_id[2], id_user)
         sendMessage(id_user, "Código de Canción : " + str(message_id[2]))
 
+def searchexternallist(update,context):
+    id_user = str(update.effective_user["id"])
+    name_external_user = str(hard(str(update.message["text"].split(" ")[1])))
+    datos = Get_external_user_info(name_external_user)
+    for linea in datos:
+        id_user_external = linea[0]
+    listas = Get_userlists(id_user_external)
+    mensaje= "Las listas existentes son: "
+    for lista in listas:
+        mensaje += "\n*"+lista[1]
+    sendMessage(id_user,mensaje)
+    mensaje=""
+
 def playexternallist(update,context):
     id_user = str(update.effective_user["id"])
     name_external_user = str(hard(str(update.message["text"].split(" ")[1])))
@@ -279,15 +300,13 @@ def deleteplaylist(update,context):
 def listplaylists(update,context):
     id_user = str(update.effective_user["id"])
     listas = Get_userlists(id_user)
-    mensaje = ""
-    mensaje= mensaje +"Las listas existentes son: "
     for lista in listas:
+        mensaje = ""
         canciones = Get_songs_in_list(str(lista[0]))
-        mensaje = mensaje + "\n- "+str(lista[1])+ " contiene: "
+        mensaje += "\n((-)) "+str(lista[1])+ " contiene: "
         for cancion in canciones:
-           mensaje = mensaje + "\n  *"+ cancion[3]+ " ("+str(cancion[1])+")"
-    sendMessage(id_user,mensaje)
-    mensaje=""
+           mensaje += "\n    *"+ cancion[3]+ " ("+str(cancion[1])+")"
+        sendMessage(id_user,mensaje)
 
 def status(update,context):
     id_user = str(update.effective_user["id"])
@@ -343,6 +362,7 @@ dp.add_handler(CommandHandler("updatef", updatef))
 dp.add_handler(CommandHandler("update", update))
 dp.add_handler(CommandHandler("atajos", atajos))
 dp.add_handler(CommandHandler("status", status))
+dp.add_handler(CommandHandler("showexlists", searchexternallist))
 
 #Atajos
 dp.add_handler(CommandHandler("sra", searchall))
@@ -359,6 +379,7 @@ dp.add_handler(CommandHandler("rfl", removefromlist))
 dp.add_handler(CommandHandler("sl", listplaylists))
 dp.add_handler(CommandHandler("pa", post_author))
 dp.add_handler(CommandHandler("st", status))
+dp.add_handler(CommandHandler("sel",searchexternallist))
 
 
 updater.start_polling()

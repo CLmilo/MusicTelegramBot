@@ -99,10 +99,20 @@ def Add_to_list(p_id_lista, message_id):
     params = config()
     conn = psycopg2.connect(**params)
     cursor = conn.cursor()
-    sql="insert into public.songs_list(id_lista,message_id) values (%s,%s)"
-    datos = (p_id_lista, message_id)
-    cursor.execute(sql, datos)
-    conn.commit()
+    cursor.execute("select * from public.songs_list where id_lista = '"+str(p_id_lista)+"' and message_id = '"+str(message_id)+"'")
+    bandera = 1
+    for message in cursor:
+        bandera =0
+    if bandera == 1:
+        sql2="insert into public.songs_list(id_lista,message_id) values (%s,%s)"
+        datos = (p_id_lista, message_id)
+        cursor.execute(sql2, datos)
+        conn.commit()
+        mensaje = str(message_id) +" se añadió con éxito"
+        return mensaje
+    else:
+        mensaje = str(message_id) +" ya se encuentra en la lista"
+        return mensaje
 
 def Modify_post_author(p_id_user, p_post_author):
     conn = None
